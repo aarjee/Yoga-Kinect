@@ -2,7 +2,6 @@ from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
 import numpy as np
-import audio_record
 from threading import Thread
 
 import time
@@ -15,7 +14,6 @@ import ctypes
 import _ctypes
 import pygame
 import sys
-import colour
 import wave
 
 if sys.hexversion >= 0x03000000:
@@ -81,7 +79,7 @@ class BodyGameRuntime(object):
 
         # Kinect runtime object, we want only color and body frames
         self._kinect = PyKinectRuntime.PyKinectRuntime(
-            PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Body |
+            PyKinectV2.FrameSourceTypes_Color |  PyKinectV2.FrameSourceTypes_Infrared | PyKinectV2.FrameSourceTypes_Body |
             PyKinectV2.FrameSourceTypes_Depth)
 
         # back buffer surface for getting Kinect color frames, 32bit color, width and height equal to the Kinect color frame size
@@ -102,6 +100,8 @@ class BodyGameRuntime(object):
         self._timestamps = None
         self._video_color = None
         self._video_depth = None
+        self._video_infrared = None
+
         self._audio = None
         self.MOUSE_BUTTON_DOWN = 1
         self.MOUSE_BUTTON_UP = 0
@@ -112,6 +112,8 @@ class BodyGameRuntime(object):
         self.isRecording = False
 
         self.sound_thread = None
+        self.ir_counter = 0
+        self.depth_counter = 0
 
 
     def csv_writer(self, filename, data):
@@ -120,19 +122,26 @@ class BodyGameRuntime(object):
             for line in data:
                 writer.writerow(line)
 
-    def store_joints(self, joints, jointPoints, person):
+    def store_joints(self, joints, joint_orientations, jointPoints, person):
         for i in range(0, 25):
             joint = joints[i]
             joint_coord = jointPoints[i]
+            orientation = joint_orientations[i].Orientation
 
             if (joint.TrackingState == 2):
                 # print(i," is tracked.")
                 self._joints_with_time.append(
-                    [person, self.now, joint_types[i], 'tracked', self._frameno, jointPoints[i].x, jointPoints[i].y])
+                    [person, self.now, joint_types[i], 'tracked', self._frameno,
+                    jointPoints[i].x, jointPoints[i].y,
+                    joint.Position.x, joint.Position.y, joint.Position.z,
+                    orientation.x, orientation.y, orientation.z, orientation.w])
             elif (joint.TrackingState == 1):
                 # print(i," is inferred.")
                 self._joints_with_time.append(
-                    [person, self.now, joint_types[i], 'inferred', self._frameno, jointPoints[i].x, jointPoints[i].y])
+                    [person, self.now, joint_types[i], 'inferred', self._frameno,
+                    jointPoints[i].x, jointPoints[i].y,
+                    joint.Position.x, joint.Position.y, joint.Position.z,
+                    orientation.x, orientation.y, orientation.z, orientation.w])
 
             if (len(self._joints_with_time) == 100):
                 self.csv_writer(self.path + '/joints.csv', self._joints_with_time)
@@ -226,16 +235,18 @@ class BodyGameRuntime(object):
         self.path = str(datetime.now().date()) + ' at ' + str(datetime.now().hour) + '.' + str(
             datetime.now().minute) + '.' + str(datetime.now().second)
         os.mkdir(self.path)
+        self.ir_path = self.path+'/ir_files'
+        self.depth_path = self.path+'/depth_files'
+        os.mkdir(self.ir_path)
+        os.mkdir(self.depth_path)
+
         # self._cnt = 0
         self._frameno = 0
-        self._video_frameno = [0, 0]
-        self._timestamps = [[], []]
-        codec_x264 = cv2.VideoWriter_fourcc('X', '2', '6', '4')
-        self._video_color = cv2.VideoWriter(self.path + '/color.avi', codec_x264, 7,
+        self._video_frameno = [0, 0, 0, 0]
+        self._timestamps = [[], [], [], []]
+        codec_x264 = cv2.VideoWriter_fourcc(*'MJPG')
+        self._video_color = cv2.VideoWriter(self.path + '/color.avi', codec_x264, 20,
                                             (self._kinect.color_frame_desc.Width, self._kinect.color_frame_desc.Height))
-        codec_none = cv2.VideoWriter_fourcc('D', 'I', 'B', ' ')
-        self._video_depth = cv2.VideoWriter(self.path + '/depth.avi', codec_none, 7,
-                                            (self._kinect.depth_frame_desc.Width, self._kinect.depth_frame_desc.Height))
         self._key_press = []
         #self.sound_thread = Thread(target=audio_record.start(self.path+'/audio.wav'), args=())
         #self.sound_thread.daemon = True
@@ -244,7 +255,6 @@ class BodyGameRuntime(object):
     def stopRecording(self):
         #audio_record.stop()
         self._video_color.release()
-        self._video_depth.release()
         self.write_key_press()
 
 
@@ -256,6 +266,8 @@ class BodyGameRuntime(object):
             if self.isRecording:
                 self.stopRecording()
             else:
+            	self.ir_counter = 0
+            	self.depth_counter = 0
                 self.startRecording()
 
             self.isRecording = not self.isRecording
@@ -276,7 +288,7 @@ class BodyGameRuntime(object):
         self._screen.blit(textSurf, textRect)
 
     def text_objects(self, text, font):
-        textSurface = font.render(text, True, colour.BLACK)
+        textSurface = font.render(text, True, (0, 0, 0))
         return textSurface, textSurface.get_rect()
 
     def run(self):
@@ -306,7 +318,7 @@ class BodyGameRuntime(object):
             # --- Getting frames and drawing
             # --- Woohoo! We've got a color frame! Let's fill out back buffer surface with frame's data
             if self.isRecording:
-                if not (self._kinect.has_new_color_frame() and self._kinect.has_new_depth_frame() and (self._bodies is not None)):
+                if not (self._kinect.has_new_color_frame() and self._kinect.has_new_depth_frame() and self._kinect.has_new_infrared_frame() and (self._bodies is not None)):
                     continue
 
             self.now = str(datetime.now().time())
@@ -315,14 +327,9 @@ class BodyGameRuntime(object):
                 self.draw_color_frame(frame, self._frame_surface)
 
                 if self.isRecording:
-                    start = time.time()
                     frame1 = frame.reshape(
                         (self._kinect.color_frame_desc.Height, self._kinect.color_frame_desc.Width, 4))
-                    end = time.time()
-                    #print("Frame reshaping: ", end - start)
-                    start = time.time()
                     frame2 = cv2.cvtColor(frame1, cv2.COLOR_RGBA2RGB)
-                    end = time.time()
                     #print("Frame conversion: ", end-start)
                     self._video_frameno[0] += 1
                     self._timestamps[0].append([self._video_frameno[0], self.now])
@@ -330,14 +337,12 @@ class BodyGameRuntime(object):
                     if (len(self._timestamps[0]) == 10):
                         self.csv_writer(self.path + '/color_timestamps.csv', self._timestamps[0])
                         self._timestamps[0] = []
-                    start = time.time()
 
                     self._video_color.write(frame2)
                     #self.frames[self._video_frameno[0]%100] = frame2
                     #if(self._video_frameno[0]%100==0):
                         #np.savez('color_frame', frame2)
 
-                    end = time.time()
                     #print("Frame writing: ", end - start)
 
             if self._kinect.has_new_depth_frame() and self.isRecording:
@@ -350,7 +355,25 @@ class BodyGameRuntime(object):
                 if (len(self._timestamps[1]) == 10):
                     self.csv_writer(self.path + '/depth_timestamps.csv', self._timestamps[1])
                     self._timestamps[1] = []
-                self._video_depth.write(frame1)
+                depth_file = open(self.depth_path + '/' + str(self.depth_counter) + '.npy', 'wb')
+                np.save(depth_file, frame1)
+                self.depth_counter += 1
+                depth_file.close()
+
+            if self._kinect.has_new_infrared_frame() and self.isRecording:
+                frame = self._kinect.get_last_infrared_frame()
+                frame1 = frame.reshape((self._kinect.infrared_frame_desc.Height, self._kinect.infrared_frame_desc.Width))
+                # cv2.imshow('frame1', frame1)
+                # cv2.waitKey(5)
+                self._video_frameno[2] += 1
+                self._timestamps[2].append([self._video_frameno[2], str(datetime.now().time())])
+                if (len(self._timestamps[2]) == 10):
+                    self.csv_writer(self.path + '/infrared_timestamps.csv', self._timestamps[2])
+                    self._timestamps[2] = []
+                ir_file = open(self.ir_path + '/' + str(self.ir_counter) + '.npy', 'wb')
+                np.save(ir_file, frame1)
+                self.ir_counter += 1
+                ir_file.close()
 
             '''if self._kinect.has_new_audio_frame() and self.isRecording:
                 frame = self._kinect.get_last_audio_frame()
@@ -371,11 +394,12 @@ class BodyGameRuntime(object):
                         continue
 
                     joints = body.joints
+                    joint_orientations = body.joint_orientations
                     # convert joint coordinates to color space
                     joint_points = self._kinect.body_joints_to_color_space(joints)
                     self.draw_body(joints, joint_points, SKELETON_COLORS[i])
                     if self.isRecording:
-                        self.store_joints(joints, joint_points, i)
+                        self.store_joints(joints, joint_orientations, joint_points, i)
 
             # --- copy back buffer surface pixels to the screen, resize it if needed and keep aspect ratio
             # --- (screen size may be different from Kinect's color frame size)
@@ -384,7 +408,7 @@ class BodyGameRuntime(object):
             surface_to_draw = pygame.transform.scale(self._frame_surface, (self._screen.get_width(), target_height));
             self._screen.blit(surface_to_draw, (0, 0))
             surface_to_draw = None
-            self.recordingButton("Start", "Stop", 30, 30, 85, 45, colour.GREEN, colour.RED)
+            self.recordingButton("Start", "Stop", 30, 30, 85, 45,  (0, 0, 255), (0, 255, 0))
             pygame.display.update()
 
             # --- Go ahead and update the screen with what we've drawn.
