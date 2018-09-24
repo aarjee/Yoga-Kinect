@@ -1,0 +1,18 @@
+#! /usr/bin/Rscript
+
+args = commandArgs(trailingOnly=TRUE)
+
+print(length(args))
+
+if (length(args) != 5) {
+
+   print("Usage: stability <joints.csv> <start time (s)> <duration (s)> <Subject ID> <AsanID>")
+   print("It outputs comma seperated list of <Subject ID>, <AsanID>, <Metric name>, <Value>")
+
+} else {  # The code to process joints comes here. It should 
+
+
+
+   print(sprintf("%s, %s, SimpleSTD, 0\n", args[4], args[5]))
+}
+
