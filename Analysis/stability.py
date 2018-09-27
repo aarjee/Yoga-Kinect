@@ -75,12 +75,22 @@ def getIndices(h,m,s):
 
 start = sys.argv[2]
 #start = '0:1:0'
+sh = int(start/3600)
+sm = int((start%3600)/60)
+ss = (start%60)
+'''
 sh,sm,ss = start.split(':')
 sh,sm,ss = np.float64(sh),np.float64(sm),np.float64(ss)
+'''
 duration = sys.argv[3]
+dh = int(duration/3600)
+dm = int((duration%3600)/60)
+ds = (duration%60)
 #duration = '0:2:0'
+'''
 dh,dm,ds = duration.split(':')
 dh,dm,ds = np.float64(dh),np.float64(dm),np.float64(ds)
+'''
 initial = jointwise[0][0][1]
 Ih,Im,Is = initial.split(':')
 Ih,Im,Is = np.float64(Ih),np.float64(Im),np.float64(Is)
