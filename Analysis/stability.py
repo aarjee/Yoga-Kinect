@@ -73,7 +73,7 @@ def getIndices(h,m,s):
         mid = int((lb+ub)/2)
     return mid
 
-start = sys.argv[2]
+start = np.float64(sys.argv[2])
 #start = '0:1:0'
 sh = int(start/3600)
 sm = int((start%3600)/60)
@@ -82,7 +82,7 @@ ss = (start%60)
 sh,sm,ss = start.split(':')
 sh,sm,ss = np.float64(sh),np.float64(sm),np.float64(ss)
 '''
-duration = sys.argv[3]
+duration = np.float64(sys.argv[3])
 dh = int(duration/3600)
 dm = int((duration%3600)/60)
 ds = (duration%60)

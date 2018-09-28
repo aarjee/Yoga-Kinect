@@ -10,8 +10,10 @@ import sys
 import numpy as np
 # input arguements <filename> <subjectid> <aasanid>
 def usage():
-    print("Usage: <filename> <subjectid> <aasanid>")
-if(len(sys.argv)!=4):
+    #print("Usage: <filename> <subjectid> <aasanid>")
+    print("Usage: <filename> <subjectid>")
+#if(len(sys.argv)!=4):
+if(len(sys.argv)!=3):    
     usage()
 
 # In[2]:
@@ -91,7 +93,7 @@ parameters = ['mean(1p)','mean(2p)','mean(1n)','mean(2n)','mean(1z)','mean(2z)',
 with open('OUTPUT.csv','a') as file:
     csv_writer = csv.writer(file)
     for i in range(len(parameters)):
-        csv_writer.writerow([sys.argv[2],sys.argv[3],parameters[i],metric_values[i]])
+        csv_writer.writerow([sys.argv[2],'simon',parameters[i],metric_values[i]])
 '''
 name = sys.argv[2]
 aasan = sys.argv[3]
