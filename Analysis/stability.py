@@ -4,7 +4,7 @@ import os
 import csv
 #usage
 def usage():
-    print('<address> <starttime(s)> <duration(s)> <subjectID> <aasanaID>')
+    sys.exit('<address> <starttime(s)> <duration(s)> <subjectID> <aasanaID>')
 if(len(sys.argv) != 6):
     usage()
 #filename = 'version2/Kunal_Naukasana/joints.csv'
@@ -148,18 +148,25 @@ inst = np.sum(weighted_instability_matrix)
 
 print(normalizer)
 print(sumlist)
-'''
-try:
-    os.chdir(sys.argv[6]+'_correlation')
-except:
-    os.mkdir(sys.argv[6]+'correlation')
-    os.chdir(sys.argv[6]+'correlation')
-with open(sys.argv[5]+'.csv','a') as corr:
-    row_csv = [sys.argv[4],inst]
-    writer = csv.writer(corr)
-    writer.writerow(row_csv)
-'''
-row = [sys.argv[4],sys.argv[5],'Stability',inst]
+
+
+subjID = ''
+
+with open('standard_table.csv','r') as st:
+    csv_reader = csv.reader(st)
+    for row in csv_reader:
+        if(row[0] == sys.argv[4]):
+            subjID = row[1]
+            continue
+    pass
+
+if(subjID == ''):
+    print('ERROR: ID NOT FOUND')
+    pass
+else:
+    row = [subjID,sys.argv[5],'Stability',inst]
+    pass
+
 with open('OUTPUT.csv','a') as csvFile:
     csv_writer = csv.writer(csvFile)
     csv_writer.writerow(row)
