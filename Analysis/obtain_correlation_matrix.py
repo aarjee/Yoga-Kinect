@@ -45,7 +45,7 @@ with open ('OUTPUT.csv','r') as output:
         # extract metric value
         value = np.float64(row[3])
         # check if row represents an aasana or pebl data
-        metric_name = row[1]+row[2]
+        metric_name = row[1]+'_'+row[2]
         # add subjID to the list of keys of inner dict
         subjID = row[0]
         if(subjID not in subjIDs):
