@@ -112,7 +112,7 @@ def simon():
         with open('OUTPUT.csv',"a") as outp:
             csv_writer = csv.writer(outp)
             csv_writer.writerow(row)
-    
+    print('csv at '+getcwd())
 def dspan():
     print('dspan')
     pass
@@ -121,6 +121,17 @@ def toh():
     print('toh')
     pass
 
+# check if you are not about to overwrite
+with open('OUTPUT.csv','r') as op:
+    csv_reader = csv.reader(op)
+    already_exists = False
+    i = 0
+    for row in csv_reader:
+        if(i%2 == 1):
+            continue
+        already_exists = (row[0] == subj_id) and row[1] == test_name
+        if(already_exists):
+            sys.exit('exists')
 
 # Create a dict of functions, call the function corresponding to the required test
 

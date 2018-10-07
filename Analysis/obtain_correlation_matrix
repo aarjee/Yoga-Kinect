@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+
+# coding: utf-8
+
+# In[1]:
+
+
 import os
 import sys
 import numpy as np
@@ -8,18 +14,26 @@ import csv
 
 # In[2]:
 
+## old script, just for reference
+## generate a dict of pebl metrics to be correlated
+## each element of the dict is another dict
+#pebl_metrics = {}
+## generate a list of keys for the outer dict
+#names_of_pebl_metrics = []
+## generate a dict of aasanas to be correlated
+## each element of the dict is another dict
+#aasanas = {}
+## generate a list of keys for the outer dict
+#names_of_aasanas = []
+## generate a list of keys for the inner dict
+##
 
-# generate a dict of pebl metrics to be correlated
-# each element of the dict is another dict
-pebl_metrics = {}
-# generate a list of keys for the outer dict
-names_of_pebl_metrics = []
-# generate a dict of aasanas to be correlated
-# each element of the dict is another dict
-aasanas = {}
-# generate a list of keys for the outer dict
-names_of_aasanas = []
-# generate a list of keys for the inner dict
+# updated script
+# create a dict of all metrics
+all_metrics = {}
+# create a list of keys
+names_of_all_metrics = []
+
 subjIDs = []
 
 
@@ -46,7 +60,8 @@ with open ('OUTPUT.csv','r') as output:
         subjID = row[0]
         if(subjID not in subjIDs):
             subjIDs.append(subjID)
-        # classify into aassana or pebl
+        # old script for reference
+        '''# classify into aassana or pebl
         if(row[2]=='Stability'): # aasana
             if(metric_name not in names_of_aasanas):
                 names_of_aasanas.append(metric_name)
@@ -58,17 +73,23 @@ with open ('OUTPUT.csv','r') as output:
                 names_of_pebl_metrics.append(metric_name)
                 pebl_metrics[metric_name] = {}
             inner_dict = pebl_metrics[metric_name]
-            inner_dict[subjID] = value
-
-
+            inner_dict[subjID] = value'''
+        # updated script
+        if (metric_name not in names_of_all_metrics):
+            names_of_all_metrics.append(metric_name)
+            all_metrics[metric_name] = {}  
+        inner_dict = all_metrics[metric_name]
+        inner_dict[subjID] = value
 # In[9]:
 
-
+# generates a row containing a list of metrics and
+# writes it to the csv as heading
+# if such a csv already exists, its content is erased
 with open('CORRELATION_MATRIX.csv','w') as corrM:
     csv_writer = csv.writer(corrM)
-    row = ['Pebl Metric']
-    for aasana in names_of_aasanas:
-        row.append(aasana)
+    row = ['Metric']
+    for any_metric in names_of_all_metrics:
+        row.append(any_metric)
     csv_writer.writerow(row)
 
 
@@ -76,32 +97,33 @@ with open('CORRELATION_MATRIX.csv','w') as corrM:
 
 
 prProg = 0
-for pebl_metric in names_of_pebl_metrics:
+
+for first_metric in names_of_all_metrics:
     # user updates
-    print('processing correlation '+ str(prProg+1) +' out of '+ str(len(names_of_pebl_metrics)))
+    print('processing correlation '+ str(prProg+1) +' out of '+ str(len(names_of_all_metrics)))
     prProg += 1
     # extract inner dict for the given metric
-    pebl_data = pebl_metrics[pebl_metric]
+    first_data = all_metrics[first_metric]
     # initialize the row to be printed
-    row = [pebl_metric]
-    for aasana in names_of_aasanas:
-        corr_pebl = []
-        corr_aasana = []
-        # obtain inner dict aasana to correlate
-        aasana_data = aasanas[aasana]
+    row = [first_metric]
+    for second_metric in names_of_all_metrics:
+        corr_first = []
+        corr_second = []
+        # obtain inner dict to correlate
+        second_data = all_metrics[second_metric]
         for subjID in subjIDs:
             try:
-                metric_value = pebl_data[subjID]
-                stability_value = aasana_data[subjID]
-                corr_pebl.append(metric_value)
-                corr_aasana.append(stability_value)
+                metric1_value = first_data[subjID]
+                metric2_value = second_data[subjID]
+                corr_first.append(metric_value)
+                corr_second.append(stability_value)
                 continue
             except:
                 continue
-        # obtain correlation of this metric for the given aasana
+        # obtain correlation
         try:
-            X = np.float64(corr_pebl)
-            Y = np.float64(corr_pebl)
+            X = np.float64(corr_first)
+            Y = np.float64(corr_second)
             sigmaX = np.std(X)
             sigmaY = np.std(Y)
             meanX = np.mean(X)
