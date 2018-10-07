@@ -20,7 +20,9 @@ if sys.hexversion >= 0x03000000:
     import _thread as thread
 else:
     import thread
-
+# initialize userID and aasanaID
+subjID = ''
+aasanaID = ''
 # colors for drawing different bodies
 SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                    pygame.color.THECOLORS["blue"],
@@ -232,8 +234,22 @@ class BodyGameRuntime(object):
 
     def startRecording(self):
         self._joints_with_time = []
-        self.path = str(datetime.now().date()) + ' at ' + str(datetime.now().hour) + '.' + str(
-            datetime.now().minute) + '.' + str(datetime.now().second)
+        # self.path = str(datetime.now().date()) + ' at ' + str(datetime.now().hour) + '.' + str(
+        #    datetime.now().minute) + '.' + str(datetime.now().second)
+        # name of the directory will be saved as subjID_aasanaID
+        subjID = input('enter subject ID: ')
+        aasanaID = input('enter aasana name: ')
+        self.path = subjID+'_'+aasanaID
+        list_of_dir = next(os.walk(os.getcwd()))[1]
+        if(self.path in list_of_dir):
+            # if the directory already exists
+            for i in range(10000):
+                print('ALREADY EXISTS ..!!\n\nALREADY EXISTS ..!!\n\nALREADY EXISTS ..!!')
+            self.path = None
+            # flip it once
+            self.isRecording = not self.isRecording
+            self.clicked = not self.clicked
+            return
         os.mkdir(self.path)
         self.ir_path = self.path+'/ir_files'
         self.depth_path = self.path+'/depth_files'
@@ -254,6 +270,8 @@ class BodyGameRuntime(object):
 
     def stopRecording(self):
         #audio_record.stop()
+        subjID = ''
+        aasanaID = ''
         self._video_color.release()
         self.write_key_press()
 
@@ -266,8 +284,8 @@ class BodyGameRuntime(object):
             if self.isRecording:
                 self.stopRecording()
             else:
-            	self.ir_counter = 0
-            	self.depth_counter = 0
+                self.ir_counter = 0
+                self.depth_counter = 0
                 self.startRecording()
 
             self.isRecording = not self.isRecording
@@ -319,6 +337,7 @@ class BodyGameRuntime(object):
             # --- Woohoo! We've got a color frame! Let's fill out back buffer surface with frame's data
             if self.isRecording:
                 if not (self._kinect.has_new_color_frame() and self._kinect.has_new_depth_frame() and self._kinect.has_new_infrared_frame() and (self._bodies is not None)):
+                    print('yo')
                     continue
 
             self.now = str(datetime.now().time())
