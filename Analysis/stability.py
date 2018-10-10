@@ -4,10 +4,14 @@ import os
 import csv
 #usage
 def usage():
-    sys.exit('<address> <starttime(s)> <duration(s)> <subjectID> <aasanaID>')
+    sys.exit('Usage <address_of_joints.csv> <starttime(s)> <duration(s)> <subjectID> <aasanaID>\noutputs a entry into OUTPUT.csv <SubjID> <aasanaID> <metric_name> <Metric_value>')
 if(len(sys.argv) != 6):
     usage()
-#filename = 'version2/Kunal_Naukasana/joints.csv'
+starttime = np.float64(sys.argv[2])
+duration = np.float64(sys.argv[3])
+subjectID = sys.argv[4]
+aasanaID = sys.argv[5]
+subject_name = ''
 filename = sys.argv[1]
 joints = []
 with open(filename, 'r') as fo:
@@ -73,24 +77,16 @@ def getIndices(h,m,s):
         mid = int((lb+ub)/2)
     return mid
 
-start = np.float64(sys.argv[2])
+start = starttime
 #start = '0:1:0'
 sh = int(start/3600)
 sm = int((start%3600)/60)
 ss = (start%60)
-'''
-sh,sm,ss = start.split(':')
-sh,sm,ss = np.float64(sh),np.float64(sm),np.float64(ss)
-'''
-duration = np.float64(sys.argv[3])
+# duration = np.float64(sys.argv[3])
 dh = int(duration/3600)
 dm = int((duration%3600)/60)
 ds = (duration%60)
 #duration = '0:2:0'
-'''
-dh,dm,ds = duration.split(':')
-dh,dm,ds = np.float64(dh),np.float64(dm),np.float64(ds)
-'''
 initial = jointwise[0][0][1]
 Ih,Im,Is = initial.split(':')
 Ih,Im,Is = np.float64(Ih),np.float64(Im),np.float64(Is)
@@ -149,25 +145,9 @@ inst = np.sum(weighted_instability_matrix)
 print(normalizer)
 print(sumlist)
 
-
-subjID = ''
-
-with open('standard_table.csv','r') as st:
-    csv_reader = csv.reader(st)
-    for row in csv_reader:
-        if(row[0] == sys.argv[4]):
-            subjID = row[1]
-            continue
-    pass
-
-if(subjID == ''):
-    print('ERROR: ID NOT FOUND')
-    pass
-else:
-    row = [subjID,sys.argv[5],'Stability',inst]
-    pass
+row1 = [subjID,aasanaID,'Stability',inst]
 
 with open('OUTPUT.csv','a') as csvFile:
     csv_writer = csv.writer(csvFile)
-    csv_writer.writerow(row)
-print(sys.argv[4],sys.argv[5],'Stability',inst)
+    csv_writer.writerow(row1)
+print(row1)
