@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-
 import numpy as np
 import os
 import sys
 import csv
 
 if(len(sys.argv)!=4):
-    sys.exit('Usage: <base_dir> <PEBL_test_name> <subj_id>')
+    sys.exit('Usage: <base_dir> <PEBL_test_name> <subj_id>\n Output: <SubjectID> <aasanaID> <metric> <value> appended to OUTPUT.csv')
 
 base_dir = sys.argv[1]
 test_name = sys.argv[2]
@@ -60,7 +59,7 @@ def simon():
                 # store keys in a list eg LIST_1
         pass
     # now we have a dict, with each key mapped to a copy of the rows of
-    # the csv file, which belong to the same category
+    # the csv file, which belongs to the same category
     means = {}
     names = []
     # for adding more classification types
@@ -113,12 +112,17 @@ def simon():
             csv_writer = csv.writer(outp)
             csv_writer.writerow(row)
     print('csv at '+getcwd())
+
 def dspan():
     print('dspan')
     pass
 
 def toh():
     print('toh')
+    pass
+
+def iowa():
+    print('iowa')
     pass
 
 # check if you are not about to overwrite
@@ -131,11 +135,11 @@ with open('OUTPUT.csv','r') as op:
             continue
         already_exists = (row[0] == subj_id) and row[1] == test_name
         if(already_exists):
-            sys.exit('exists')
+            print('exists')
 
 # Create a dict of functions, call the function corresponding to the required test
 
-func_dict = {'simon':simon, 'dspan':dspan, 'toh':toh}
+func_dict = {'simon':simon, 'dspan':dspan, 'toh':toh, 'iowa':iowa}
 
 
 # In[139]:

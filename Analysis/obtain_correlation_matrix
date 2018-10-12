@@ -12,6 +12,7 @@ import numpy as np
 import csv
 
 
+
 # In[2]:
 
 ## old script, just for reference
@@ -49,11 +50,16 @@ with open ('OUTPUT.csv','r') as output:
     subjID = ''
     # read the csv and classify
     for row in csv_reader:
-        if(i%2 != 0):
+        if(not row):
+            print(True)
             continue
         i = i + 1
         # extract metric value
-        value = np.float64(row[3])
+        try:
+            value = np.float64(row[3])
+        except:
+            #print('restarting loop')
+            continue
         # check if row represents an aasana or pebl data
         metric_name = row[1]+'_'+row[2]
         # add subjID to the list of keys of inner dict
@@ -111,32 +117,48 @@ for first_metric in names_of_all_metrics:
         corr_second = []
         # obtain inner dict to correlate
         second_data = all_metrics[second_metric]
+        #print(second_data)
         for subjID in subjIDs:
             try:
+                #print(first_data[subjID],second_data[subjID])
                 metric1_value = first_data[subjID]
+                
                 metric2_value = second_data[subjID]
-                corr_first.append(metric_value)
-                corr_second.append(stability_value)
+                
+                #print('|||'+metric1_value,metric2_value)
+                corr_first.append(np.float64(metric1_value))
+                corr_second.append(np.float64(metric2_value))
                 continue
             except:
+                #print('Bartleby '+subjID)
                 continue
         # obtain correlation
-        try:
-            X = np.float64(corr_first)
-            Y = np.float64(corr_second)
-            sigmaX = np.std(X)
-            sigmaY = np.std(Y)
-            meanX = np.mean(X)
-            meanY = np.mean(Y)
-            tempX = X-mean(X)
-            tempY = Y-mean(Y)
-            temp = tempX*tempY
-            covXY = np.mean(temp)
-            corrXY = covXY/(sigmaX*sigmaY)
-            row.append(corrXY)
+        # print(corr_first)
+        # print(corr_second)
+        
+        X = np.array(corr_first,dtype = np.float64)
+        Y = np.array(corr_second,dtype = np.float64 )
+        #print(1)
+        sigmaX = np.std(X)
+        sigmaY = np.std(Y)
+        #print(2)
+        meanX = np.mean(X)
+        meanY = np.mean(Y)
+        #print(3)
+        tempX = X-np.mean(X)
+        tempY = Y-np.mean(Y)
+        #print(4)
+        temp = tempX*tempY
+        covXY = np.mean(temp)
+        corrXY = covXY/(sigmaX*sigmaY)
+        row.append(corrXY)
+        #print(5)
+        # print(corrXY)
         # if the correlation cannot be obtained, append a string instead of the correlation value
-        except:
-            row.append('correlation error')
+        #except:
+            #print(Exception)
+            # print(corr_first,corr_second)
+        #    row.append('correlation error')
     with open('CORRELATION_MATRIX.csv','a') as corrM:
         csv_writer = csv.writer(corrM)
         csv_writer.writerow(row)
