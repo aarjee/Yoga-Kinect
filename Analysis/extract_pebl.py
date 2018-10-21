@@ -1,10 +1,11 @@
+#!/usr/bin/env python
 import numpy as np
 import os
 import sys
 import csv
 
 if(len(sys.argv)!=4):
-    sys.exit('Usage: <base_dir> <PEBL_test_name> <subj_id>')
+    sys.exit('Usage: <base_dir> <PEBL_test_name> <subj_id>\n Output: <SubjectID> <test_name> <metric> <value> appended to OUTPUT.csv')
 
 base_dir = sys.argv[1]
 test_name = sys.argv[2]
@@ -58,7 +59,7 @@ def simon():
                 # store keys in a list eg LIST_1
         pass
     # now we have a dict, with each key mapped to a copy of the rows of
-    # the csv file, which belong to the same category
+    # the csv file, which belongs to the same category
     means = {}
     names = []
     # for adding more classification types
@@ -110,19 +111,276 @@ def simon():
         with open('OUTPUT.csv',"a") as outp:
             csv_writer = csv.writer(outp)
             csv_writer.writerow(row)
-    
+    print('csv at '+os.getcwd())
+    pass
+
 def dspan():
-    print('dspan')
+    # print('dspan')
+    
+    # obtain the csv name and address
+    csv_name = 'dspan-forward-'+ subj_id + '.csv'
+    csv_address = base_dir + '/' + test_name + '/data/'+subj_id+ '/' + csv_name
+
+    # null dict of dspan values, and a list of metrics
+    dspan_values = {}
+    dspan_metrics = []
+
+    # fill the metrics in the list and assign values in the dict
+    with open(csv_address,'r') as dopen:
+        csv_reader = csv.reader(dopen)
+        number_of_digits = 0
+        correct = False
+        response_time = 0
+        metric_name = ''
+        largest = 0
+        # obtain the minimum response time
+        # obtain the largest number of digits that can be remembered
+        heading = True
+        for row in csv_reader:
+            #print(row[5])
+            if(heading):
+                heading = False
+                continue
+            number_of_digits = np.float64(row[5])
+            correct = bool(row[9])
+            response_time = np.float64(row[10])
+            metric_name = str(row[5])+'_digit_min_response_time-'+str(row[2])
+            metric_value = response_time
+            if(correct):
+                if(metric_name not in dspan_metrics):
+                    dspan_metrics.append(metric_name)
+                    dspan_values[metric_name] = metric_value
+                else:
+                    if(dspan_values[metric_name]>metric_value):
+                        dspan_values[metric_name] = metric_value
+            largest = max(largest,number_of_digits)
+            continue
+        # update the largest number of digits
+        new_metric = 'largest_no_of_digits'
+        dspan_metrics.append(new_metric)
+        dspan_values[new_metric] = largest
+        # write the metrics into the csv
+        with open('OUTPUT.csv','a') as op:
+            csv_writer = csv.writer(op)
+            for i in range(len(dspan_metrics)):
+                Mname = dspan_metrics[i]
+                row = [subj_id,test_name,Mname,dspan_values[Mname]]
+                csv_writer.writerow(row)
+                continue 
+    print('csv at '+os.getcwd())         
     pass
 
 def toh():
     print('toh')
+
+    csv_name = 'toh-summary-'+subj_id+'.csv'
+    csv_address = base_dir+'/'+test_name+'/data/'+subj_id+'/'+csv_name
+    # get all the data as presented in the summary
+    # generate, for each trial- total_steps, excess_steps, absolute_time, per_step_time
+    values = ['total_steps', 'excess_steps', 'absolute_time', 'perStep_time']
+    toh_summary = []
+    trial_wise = {} # dict of dicts
+    trial_types = [] # keys to the above dict
+    time_list = []
+    step_list = []
+
+    with open(csv_address,'r') as tohR:
+        csv_reader = csv.reader(tohR)
+        # list of all rows
+        # dict containing trialwise data
+        # print(1)
+        heading = True
+        curdir = os.getcwd()
+        for row in csv_reader:
+            if(heading):
+                heading = False
+                #print(2)
+                continue
+            #print(3)
+            toh_summary.append(row)
+            trialNo = row[1]
+            shortest = np.float64(row[3])
+            success = bool(row[8])
+            steps = np.float64(row[9])
+            time = np.float64(row[10])
+            step_list.append(steps)
+            time_list.append(time)
+            #print(4)
+            if(success and (trialNo not in trial_types)):
+                trial_types.append(trialNo)
+                trial_wise[trialNo] = {}
+                #print(5)
+            if(success):
+                #print(6)
+                trial = trial_wise[trialNo]
+                trial[values[0]] = steps
+                trial[values[1]] = steps-shortest
+                trial[values[2]] = time
+                trial[values[3]] = time/steps
+        # write it in
+    row1 = [subj_id, test_name, 'total_time',np.sum(time_list)]
+    row2 = [subj_id, test_name, 'total_steps',np.sum(step_list)]
+    row3 = [subj_id, test_name, 'time_per_step',np.sum(time_list)/np.sum(step_list)]
+
+    with open(curdir+'/OUTPUT.csv','a') as op:
+        csv_writer = csv.writer(op)
+        csv_writer.writerow(row1)
+        csv_writer.writerow(row2)
+        csv_writer.writerow(row3)
+        for typez in trial_types:
+            inner_dict = trial_wise[typez]
+            for value in values:
+                row = [subj_id, test_name, 'trial-'+str(typez)+'_'+str(value),inner_dict[value]]
+                csv_writer.writerow(row) 
+    
+
+    print('csv at '+os.getcwd()) 
+    pass
+
+def iowa():
+    # print('iowa')
+    csv_name = 'igtlog-'+subj_id+'.csv'
+    csv_address = base_dir+'/'+ test_name + '/data/'+subj_id+ '/'+csv_name
+    # list of metrics and a dict containing their values
+    iowa_metrics = []
+    iowa_values = {}
+    # segregate into pre-hunch (trialnum<=50) and hunch (trialnum > 50)
+    pre_hunch = []
+    # trailnum i -> hunch[i-50]
+    hunch = []
+    # also create data of all rows, just in case
+    iowa_data = []
+    # open the csv and segregate
+    with open(csv_address,'r') as iowaR:
+        csv_reader = csv.reader(iowaR)
+        heading = True
+        for row in csv_reader:
+            if(heading):
+                heading = False
+                continue
+            # append to full data
+            iowa_data.append(row)
+            #segregate
+            trialnum = np.uint8(row[2])
+            if(trialnum<=50):
+                pre_hunch.append(row)
+            else:
+                hunch.append(row)
+    # now we have pre-hunch and hunch data
+    # use prehunch data to rank decks
+    # dict containing gains
+    net_gains = {}
+    # list of keys (A,B,C,D)
+    deck_names = []
+    for row in pre_hunch:
+        key = row[3]
+        gain = np.float64(row[6])
+        if key not in deck_names:
+            deck_names.append(key)
+            net_gains[key] = 0
+        net_gains[key] += gain
+    # rank the decks based on how good they are
+    # bubble sort
+    for i in range(len(deck_names)-1):
+        for j in range(len(deck_names)-1-i):
+            a = deck_names[j]
+            b = deck_names[j+1]
+            if(net_gains[a]<net_gains[b]):
+                deck_names[j] = b
+                deck_names[j+1] = a
+    # now deck_names[0] is the best deck, and deck_names[len(deck_names)-1] is the worst
+    # check the number of times you repeat the decks, after hunch is obtained
+    # create a dict of number of repititions
+    hunch_rep = {}
+    # create a dict of hunch gains
+    hunch_gains = {}
+    # fill these dicts
+    for deck in deck_names:
+        hunch_rep[deck] = 0
+        hunch_gains[deck] = 0
+        for row in hunch:
+            if(row[3]==deck):
+                hunch_rep[deck]+=1
+                hunch_gains[deck]+=np.float64(row[6])
+    # generate hunch metrics for each rank
+    for i in range(len(deck_names)):
+        # obtain metric and value
+        iowa_metric1 = 'hunch_repeated_'+str(i+1)
+        iowa_metric2 = 'hunch_gain_'+str(i+1)
+        iowa_value1 = np.float64(hunch_rep[deck_names[i]])
+        iowa_value2 = np.float64(hunch_gains[deck_names[i]])
+        # add them to the final lists of metrics and values
+        iowa_metrics.append(iowa_metric1)
+        iowa_values[iowa_metric1] = iowa_value1
+        iowa_metrics.append(iowa_metric2)
+        iowa_values[iowa_metric2] = iowa_value2
+    # generate values for top and bottom half rank metrics
+    metric_top_rep = 'hunch_repeated_top'
+    metric_top_gain = 'hunch_gain_top'
+    metric_bottom_rep = 'hunch_repeated_bottom'
+    metric_bottom_gain = 'hunch_gain_bottom'
+    #compute values of the above metrics
+    iowa_values[metric_top_rep] = 0
+    iowa_values[metric_top_gain] = 0
+    iowa_values[metric_bottom_rep] = 0
+    iowa_values[metric_bottom_gain] = 0
+
+    iowa_metrics.append(metric_top_rep)
+    iowa_metrics.append(metric_top_gain)
+    iowa_metrics.append(metric_bottom_rep)
+    iowa_metrics.append(metric_bottom_gain)
+    
+    for i in range(len(deck_names)):
+        if(i<int(len(deck_names)/2)):
+            metric_name1 = 'hunch_repeated_'+str(i+1)
+            metric_name2 = 'hunch_gain_'+str(i+1)
+            iowa_values[metric_top_rep] += iowa_values[metric_name1]
+            iowa_values[metric_top_gain] += iowa_values[metric_name2]
+        else:
+            metric_name1 = 'hunch_repeated_'+str(i+1)
+            metric_name2 = 'hunch_gain_'+str(i+1)
+            iowa_values[metric_bottom_rep] += iowa_values[metric_name1]
+            iowa_values[metric_bottom_gain] += iowa_values[metric_name2]
+    # compute post hunch and net gains
+    # for total gain in the entire game
+    last_row = iowa_data[len(iowa_data)-1]
+    full_net_gain = np.float64(last_row[7])-np.float64(last_row[8])
+    full_metric = 'net_gain'
+    iowa_metrics.append(full_metric)
+    iowa_values[full_metric] = full_net_gain
+    # for gain in the hunch period
+    last_row_hunch = hunch[len(hunch)-1]
+    first_row_hunch = hunch[0]
+    hunch_metric = 'hunch_gain'
+    hunch_value = np.float64(last_row_hunch[7])-np.float64(first_row_hunch[7])
+    iowa_metrics.append(hunch_metric)
+    iowa_values[hunch_metric] = hunch_value
+    # finally, write all the metrics into OUTPUT.csv
+    with open('OUTPUT.csv','a') as iowaW:
+        csv_writer = csv.writer(iowaW)
+        for metric_i in iowa_metrics:
+            row = [subj_id,'iowa',metric_i,iowa_values[metric_i]]
+            csv_writer.writerow(row)
+    print('csv at '+os.getcwd()) 
     pass
 
 
+# check if you are not about to overwrite
+'''
+with open('OUTPUT.csv','r') as op:
+    csv_reader = csv.reader(op)
+    already_exists = False
+    i = 0
+    for row in csv_reader:
+        if(i%2 == 1):
+            continue
+        already_exists = (row[0] == subj_id) and row[1] == test_name
+        if(already_exists):
+            print('exists')
+'''
 # Create a dict of functions, call the function corresponding to the required test
 
-func_dict = {'simon':simon, 'dspan':dspan, 'toh':toh}
+func_dict = {'simon':simon, 'dspan':dspan, 'toh':toh, 'iowa':iowa}
 
 
 # In[139]:

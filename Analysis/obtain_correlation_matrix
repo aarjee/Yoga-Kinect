@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 
 # coding: utf-8
@@ -37,10 +36,43 @@ names_of_all_metrics = []
 
 subjIDs = []
 
-
+'''
 # In[4]:
+list_of_files = next(os.walk(os.getcwd()))[2]
+if('OUTPUT1.csv' in list_of_files):
+    with open ('OUTPUT1.csv','r') as output:
+        csv_reader = csv.reader(output)
+        i = 0
+        # inititalize metric name
+        metric_name = ''
+        # initialize the key name
+        subjID = ''
+        # read the csv and classify
+        for row in csv_reader:
+            if(not row):
+                print(True)
+                continue
+            i = i + 1
+            # extract metric value
+            try:
+                value = np.float64(row[3])
+            except:
+                #print('restarting loop')
+                continue
+            # check if row represents an aasana or pebl data
+            metric_name = row[1]+'_'+row[2]
+            # add subjID to the list of keys of inner dict
+            subjID = row[0]
+            if(subjID not in subjIDs):
+                subjIDs.append(subjID)
+        # updated script
+            if (metric_name not in names_of_all_metrics):
+                names_of_all_metrics.append(metric_name)
+                all_metrics[metric_name] = {}  
+            inner_dict = all_metrics[metric_name]
+            inner_dict[subjID] = value
 
-
+'''
 with open ('OUTPUT.csv','r') as output:
     csv_reader = csv.reader(output)
     i = 0

@@ -1,4 +1,5 @@
 
+
 # coding: utf-8
 
 # In[1]:
@@ -10,26 +11,68 @@ import numpy as np
 import csv
 
 
+
 # In[2]:
 
+## old script, just for reference
+## generate a dict of pebl metrics to be correlated
+## each element of the dict is another dict
+#pebl_metrics = {}
+## generate a list of keys for the outer dict
+#names_of_pebl_metrics = []
+## generate a dict of aasanas to be correlated
+## each element of the dict is another dict
+#aasanas = {}
+## generate a list of keys for the outer dict
+#names_of_aasanas = []
+## generate a list of keys for the inner dict
+##
 
-# generate a dict of pebl metrics to be correlated
-# each element of the dict is another dict
-pebl_metrics = {}
-# generate a list of keys for the outer dict
-names_of_pebl_metrics = []
-# generate a dict of aasanas to be correlated
-# each element of the dict is another dict
-aasanas = {}
-# generate a list of keys for the outer dict
-names_of_aasanas = []
-# generate a list of keys for the inner dict
+# updated script
+# create a dict of all metrics
+all_metrics = {}
+# create a list of keys
+names_of_all_metrics = []
+
 subjIDs = []
 
-
+'''
 # In[4]:
+list_of_files = next(os.walk(os.getcwd()))[2]
+if('OUTPUT1.csv' in list_of_files):
+    with open ('OUTPUT1.csv','r') as output:
+        csv_reader = csv.reader(output)
+        i = 0
+        # inititalize metric name
+        metric_name = ''
+        # initialize the key name
+        subjID = ''
+        # read the csv and classify
+        for row in csv_reader:
+            if(not row):
+                print(True)
+                continue
+            i = i + 1
+            # extract metric value
+            try:
+                value = np.float64(row[3])
+            except:
+                #print('restarting loop')
+                continue
+            # check if row represents an aasana or pebl data
+            metric_name = row[1]+'_'+row[2]
+            # add subjID to the list of keys of inner dict
+            subjID = row[0]
+            if(subjID not in subjIDs):
+                subjIDs.append(subjID)
+        # updated script
+            if (metric_name not in names_of_all_metrics):
+                names_of_all_metrics.append(metric_name)
+                all_metrics[metric_name] = {}  
+            inner_dict = all_metrics[metric_name]
+            inner_dict[subjID] = value
 
-
+'''
 with open ('OUTPUT.csv','r') as output:
     csv_reader = csv.reader(output)
     i = 0
@@ -39,18 +82,24 @@ with open ('OUTPUT.csv','r') as output:
     subjID = ''
     # read the csv and classify
     for row in csv_reader:
-        if(i%2 != 0):
+        if(not row):
+            print(True)
             continue
         i = i + 1
         # extract metric value
-        value = np.float64(row[3])
+        try:
+            value = np.float64(row[3])
+        except:
+            #print('restarting loop')
+            continue
         # check if row represents an aasana or pebl data
         metric_name = row[1]+'_'+row[2]
         # add subjID to the list of keys of inner dict
         subjID = row[0]
         if(subjID not in subjIDs):
             subjIDs.append(subjID)
-        # classify into aassana or pebl
+        # old script for reference
+        '''# classify into aassana or pebl
         if(row[2]=='Stability'): # aasana
             if(metric_name not in names_of_aasanas):
                 names_of_aasanas.append(metric_name)
@@ -62,17 +111,23 @@ with open ('OUTPUT.csv','r') as output:
                 names_of_pebl_metrics.append(metric_name)
                 pebl_metrics[metric_name] = {}
             inner_dict = pebl_metrics[metric_name]
-            inner_dict[subjID] = value
-
-
+            inner_dict[subjID] = value'''
+        # updated script
+        if (metric_name not in names_of_all_metrics):
+            names_of_all_metrics.append(metric_name)
+            all_metrics[metric_name] = {}  
+        inner_dict = all_metrics[metric_name]
+        inner_dict[subjID] = value
 # In[9]:
 
-
+# generates a row containing a list of metrics and
+# writes it to the csv as heading
+# if such a csv already exists, its content is erased
 with open('CORRELATION_MATRIX.csv','w') as corrM:
     csv_writer = csv.writer(corrM)
-    row = ['Pebl Metric']
-    for aasana in names_of_aasanas:
-        row.append(aasana)
+    row = ['Metric']
+    for any_metric in names_of_all_metrics:
+        row.append(any_metric)
     csv_writer.writerow(row)
 
 
@@ -80,45 +135,62 @@ with open('CORRELATION_MATRIX.csv','w') as corrM:
 
 
 prProg = 0
-for pebl_metric in names_of_pebl_metrics:
+
+for first_metric in names_of_all_metrics:
     # user updates
-    print('processing correlation '+ str(prProg+1) +' out of '+ str(len(names_of_pebl_metrics)))
+    print('processing correlation '+ str(prProg+1) +' out of '+ str(len(names_of_all_metrics)))
     prProg += 1
     # extract inner dict for the given metric
-    pebl_data = pebl_metrics[pebl_metric]
+    first_data = all_metrics[first_metric]
     # initialize the row to be printed
-    row = [pebl_metric]
-    for aasana in names_of_aasanas:
-        corr_pebl = []
-        corr_aasana = []
-        # obtain inner dict aasana to correlate
-        aasana_data = aasanas[aasana]
+    row = [first_metric]
+    for second_metric in names_of_all_metrics:
+        corr_first = []
+        corr_second = []
+        # obtain inner dict to correlate
+        second_data = all_metrics[second_metric]
+        #print(second_data)
         for subjID in subjIDs:
             try:
-                metric_value = pebl_data[subjID]
-                stability_value = aasana_data[subjID]
-                corr_pebl.append(metric_value)
-                corr_aasana.append(stability_value)
+                #print(first_data[subjID],second_data[subjID])
+                metric1_value = first_data[subjID]
+                
+                metric2_value = second_data[subjID]
+                
+                #print('|||'+metric1_value,metric2_value)
+                corr_first.append(np.float64(metric1_value))
+                corr_second.append(np.float64(metric2_value))
                 continue
             except:
+                #print('Bartleby '+subjID)
                 continue
-        # obtain correlation of this metric for the given aasana
-        try:
-            X = np.float64(corr_pebl)
-            Y = np.float64(corr_pebl)
-            sigmaX = np.std(X)
-            sigmaY = np.std(Y)
-            meanX = np.mean(X)
-            meanY = np.mean(Y)
-            tempX = X-mean(X)
-            tempY = Y-mean(Y)
-            temp = tempX*tempY
-            covXY = np.mean(temp)
-            corrXY = covXY/(sigmaX*sigmaY)
-            row.append(corrXY)
+        # obtain correlation
+        # print(corr_first)
+        # print(corr_second)
+        
+        X = np.array(corr_first,dtype = np.float64)
+        Y = np.array(corr_second,dtype = np.float64 )
+        #print(1)
+        sigmaX = np.std(X)
+        sigmaY = np.std(Y)
+        #print(2)
+        meanX = np.mean(X)
+        meanY = np.mean(Y)
+        #print(3)
+        tempX = X-np.mean(X)
+        tempY = Y-np.mean(Y)
+        #print(4)
+        temp = tempX*tempY
+        covXY = np.mean(temp)
+        corrXY = covXY/(sigmaX*sigmaY)
+        row.append(corrXY)
+        #print(5)
+        # print(corrXY)
         # if the correlation cannot be obtained, append a string instead of the correlation value
-        except:
-            row.append('correlation error')
+        #except:
+            #print(Exception)
+            # print(corr_first,corr_second)
+        #    row.append('correlation error')
     with open('CORRELATION_MATRIX.csv','a') as corrM:
         csv_writer = csv.writer(corrM)
         csv_writer.writerow(row)
