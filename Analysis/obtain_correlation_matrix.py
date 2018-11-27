@@ -10,25 +10,11 @@ import sys
 import numpy as np
 import csv
 
+def usage():
+	print('Usage\nInput arguments "0" for a detailed correlation matrix, "1" for a condensed correlation matrix ')
 
-
-# In[2]:
-
-## old script, just for reference
-## generate a dict of pebl metrics to be correlated
-## each element of the dict is another dict
-#pebl_metrics = {}
-## generate a list of keys for the outer dict
-#names_of_pebl_metrics = []
-## generate a dict of aasanas to be correlated
-## each element of the dict is another dict
-#aasanas = {}
-## generate a list of keys for the outer dict
-#names_of_aasanas = []
-## generate a list of keys for the inner dict
-##
-
-# updated script
+if(len(sys.argv)!=2):
+	usage()
 # create a dict of all metrics
 all_metrics = {}
 # create a list of keys
@@ -36,43 +22,7 @@ names_of_all_metrics = []
 
 subjIDs = []
 
-'''
-# In[4]:
-list_of_files = next(os.walk(os.getcwd()))[2]
-if('OUTPUT1.csv' in list_of_files):
-    with open ('OUTPUT1.csv','r') as output:
-        csv_reader = csv.reader(output)
-        i = 0
-        # inititalize metric name
-        metric_name = ''
-        # initialize the key name
-        subjID = ''
-        # read the csv and classify
-        for row in csv_reader:
-            if(not row):
-                print(True)
-                continue
-            i = i + 1
-            # extract metric value
-            try:
-                value = np.float64(row[3])
-            except:
-                #print('restarting loop')
-                continue
-            # check if row represents an aasana or pebl data
-            metric_name = row[1]+'_'+row[2]
-            # add subjID to the list of keys of inner dict
-            subjID = row[0]
-            if(subjID not in subjIDs):
-                subjIDs.append(subjID)
-        # updated script
-            if (metric_name not in names_of_all_metrics):
-                names_of_all_metrics.append(metric_name)
-                all_metrics[metric_name] = {}  
-            inner_dict = all_metrics[metric_name]
-            inner_dict[subjID] = value
 
-'''
 with open ('OUTPUT.csv','r') as output:
     csv_reader = csv.reader(output)
     i = 0
@@ -93,26 +43,17 @@ with open ('OUTPUT.csv','r') as output:
             #print('restarting loop')
             continue
         # check if row represents an aasana or pebl data
+        if(int(sys.argv[1])==1):
+        	components = row[2].split('_')
+        	if(components[0] == 'JointType'):
+        		continue
+
         metric_name = row[1]+'_'+row[2]
         # add subjID to the list of keys of inner dict
         subjID = row[0]
         if(subjID not in subjIDs):
             subjIDs.append(subjID)
-        # old script for reference
-        '''# classify into aassana or pebl
-        if(row[2]=='Stability'): # aasana
-            if(metric_name not in names_of_aasanas):
-                names_of_aasanas.append(metric_name)
-                aasanas[metric_name] = {}
-            inner_dict = aasanas[metric_name]
-            inner_dict[subjID] = value
-        else:
-            if(metric_name not in names_of_pebl_metrics):
-                names_of_pebl_metrics.append(metric_name)
-                pebl_metrics[metric_name] = {}
-            inner_dict = pebl_metrics[metric_name]
-            inner_dict[subjID] = value'''
-        # updated script
+        
         if (metric_name not in names_of_all_metrics):
             names_of_all_metrics.append(metric_name)
             all_metrics[metric_name] = {}  
@@ -123,7 +64,10 @@ with open ('OUTPUT.csv','r') as output:
 # generates a row containing a list of metrics and
 # writes it to the csv as heading
 # if such a csv already exists, its content is erased
-with open('CORRELATION_MATRIX.csv','w') as corrM:
+file_name = 'CORRELATION_MATRIX.csv'
+if(int(sys.argv[1])==1):
+	file_name = 'CONDENSED_CORRELATION_MATRIX.csv'
+with open(file_name,'w') as corrM:
     csv_writer = csv.writer(corrM)
     row = ['Metric']
     for any_metric in names_of_all_metrics:
