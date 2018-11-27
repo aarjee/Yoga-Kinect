@@ -24,25 +24,25 @@ list_of_subjects = next(os.walk(os.getcwd()))[1]
 
 # aasana_start_dur['someasana'] = [left start time, left duration, right start time, right duration]
 aasana_start_dur = {
-    'ArdhaChakrasana':[0,0,0,0],
-    'Garudasana':[0,0,0,0],
-    'Gorakshasana':[0,0,0,0],           
-    'Katichakrasana':[0,0,0,0],
-    'Natarajasana':[0,0,0,0],
-    'Natavarasana':[0,0,0,0],
-    'Naukasana':[0,0,0,0],
-    'Padahastasana':[0,0,0,0],
-    'ParivrittaTrikonasana':[0,0,0,0],
-    'Pranamasana':[0,0,0,0],
-    'Santolanasana':[0,0,0,0],
-    'Still':[0,0,0,0],
-    'Tadasana':[0,0,0,0],
-    'TiryakTadasana':[0,0,0,0],
-    'Trikonasana':[0,0,0,0],
-    'Tuladandsana':[0,0,0,0],
-    'Utkatasana':[0,0,0,0],
-    'Virabhadrasana':[0,0,0,0],
-    'Vrikshasana':[0,0,0,0],    
+    'ArdhaChakrasana':[25,60,25,60], # non bilateral
+    'Garudasana':[25,25,65,25],
+    'Gorakshasana':[25,60,25,60], # non bilateral          
+    'Katichakrasana':[25,60,100,60], 
+    'Natarajasana':[25,40,80,40],
+    'Natavarasana':[25,60,100,60],
+    'Naukasana':[15,20,15,20], # non bilateral
+    'Padahastasana':[30,90,30,90], # non bilateral
+    'ParivrittaTrikonasana':[30,30,80,30], 
+    'Pranamasana':[25,30,65,30],
+    'Santolanasana':[25,35,25,35], # non bilateral
+    'Still':[20,20,20,20], # non bilateral
+    'Tadasana':[25,55,25,55], # non bilateral
+    'TiryakTadasana':[25,35,75,35],
+    'Trikonasana':[30,30,80,30],
+    'Tuladandsana':[20,20,20,20], # needs input
+    'Utkatasana':[20,30,20,30], # non bilateral
+    'Virabhadrasana':[30,25,70,25],
+    'Vrikshasana':[25,30,65,30],    
 }
 
 joint_types = ['JointType_SpineBase',
@@ -120,15 +120,22 @@ def getBegEnd(start,duration,jointwise):
     return begin,end
         
 
+
+
 for subjectID in list_of_subjects:
 
     list_of_aasanas = next(os.walk(os.getcwd()+'/'+subjectID))[1]
+    # obtain a list of aasanas using the names of the folders in the directory
+    # generate a list of names of the folders in the directory
+    # extract the aasana name from that list
     for i in range(len(list_of_aasanas)):
         temp = list_of_aasanas[i].split('_')
         aasana1 = ''
         for j in range(1,len(temp)):
             aasana1 = aasana1+temp[j]
         list_of_aasanas[i] = aasana1
+    
+    # generate a list of joints by accessing the files in list_of_aasanas
     for aasanaID in list_of_aasanas:
         filename = directory+'/'+subjectID+'/'+subjectID+'_'+aasanaID+'/joints.csv'
         # filename = sys.argv[1]
@@ -150,7 +157,7 @@ for subjectID in list_of_subjects:
             for j in range(len(joint_types)):
                 if(row[2]==joint_types[j]):
                     jointwise[j].append(row)
-    
+    	# jointwise[j] contains data on joint joint_types[j]
         # get begin and end
         time_data = aasana_start_dur[aasanaID]
         start_left = int(time_data[0])
