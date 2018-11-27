@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import os
 import csv
+import classifications as clf
 #usage
 def usage():
     sys.exit('Usage: \nInput: <base_directory> \n outputs a entry into OUTPUT.csv <SubjID> <aasanaID> <metric_name> <Metric_value>')
@@ -119,6 +120,34 @@ def getBegEnd(start,duration,jointwise):
     end = getIndices(eh,em,es,jointwise)
     return begin,end
         
+def extract_classification_stability(subjID,aasana_list,group_name):
+	stabilities_l = []
+	stabilities_r = []
+	mean_l = 0
+	mean_r = 0
+	mean = 0
+
+	with open('OUTPUT.csv','r') as csvFile:
+		csv_reader = csv.reader(csvFile)
+		for row in csv_reader:
+			if(not row):
+				continue
+			if(row[1] in aasana_list and row[0] == subjID):
+				if(row[2]=='Stability-l'):
+					stabilities_l.append(np.float64(row[3]))
+				elif(row[1]=='Stability-r'):
+					stabilities_r.append(np.float64(row[3]))
+	mean_l = np.mean(stabilities_l)
+	mean_r = np.mean(stabilities_r)
+	mean = (mean_l + mean_r)/2
+	row1 = [subjID,group_name,'Stability-l',mean_l]
+	row2 = [subjID,group_name,'Stability-r',mean_r]
+	row3 = [subjID,group_name,'Stability',mean]
+	rows = [row1,row2,row3]
+	with open('OUTPUT.csv','a') as csvFile:
+		csv_writer = csv.writer(csvFile)
+		for row in rows:
+			csv_writer.writerow(row) 
 
 
 
@@ -283,6 +312,12 @@ for subjectID in list_of_subjects:
             csv_writer.writerow(row1)
         print(row1)
         os.chdir(directory)
+
+    extract_classification_stability(subjectID,clf.Type.unilateral,'Type_unilateral')
+    extract_classification_stability(subjectID,clf.Type.bilateral,'Type_bilateral')
+    extract_classification_stability(subjectID,clf.Type.horizontal,'Type_horizontal')
+    extract_classification_stability(subjectID,clf.Category.non_balancing,'Category_nonbalancing')
+    extract_classification_stability(subjectID,clf.Category.balancing,'Category_balancing')
 
 os.chdir(output_dir)
 print('~Fin')
