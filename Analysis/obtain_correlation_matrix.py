@@ -12,9 +12,12 @@ import csv
 
 def usage():
 	print('Usage\nInput arguments "0" for a detailed correlation matrix, "1" for a condensed correlation matrix ')
+    #sys.exit('gute nacht')
+    #pass
 
 if(len(sys.argv)!=2):
 	usage()
+    
 # create a dict of all metrics
 all_metrics = {}
 # create a list of keys
@@ -36,18 +39,18 @@ with open ('OUTPUT.csv','r') as output:
             print(True)
             continue
         i = i + 1
+        
+        # check if row represents an aasana or pebl data
+        if(int(sys.argv[1])==1):
+        	components = row[2].split('_')
+        	if(components[0] == 'JointType'):
+        		continue
         # extract metric value
         try:
             value = np.float64(row[3])
         except:
             #print('restarting loop')
             continue
-        # check if row represents an aasana or pebl data
-        if(int(sys.argv[1])==1):
-        	components = row[2].split('_')
-        	if(components[0] == 'JointType'):
-        		continue
-
         metric_name = row[1]+'_'+row[2]
         # add subjID to the list of keys of inner dict
         subjID = row[0]
@@ -135,7 +138,8 @@ for first_metric in names_of_all_metrics:
             #print(Exception)
             # print(corr_first,corr_second)
         #    row.append('correlation error')
-    with open('CORRELATION_MATRIX.csv','a') as corrM:
+    with open(file_name,'a') as corrM:
+        #print(file_name, row)
         csv_writer = csv.writer(corrM)
         csv_writer.writerow(row)
         # user updates

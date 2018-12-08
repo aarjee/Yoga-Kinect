@@ -4,7 +4,30 @@ import numpy as np
 import os
 import csv
 import classifications as clf
-#usage
+# checklist (ref minor_changes)
+checklist = [
+    'Ardhachakrasana', # oneside
+    'Garudasana', 
+    'Gorakshasana', # oneside           
+    'Katichakrasana',
+    'Natarajasana',
+    'Natavarasana',
+    'Naukasana',
+    'Padahastasana', # oneside
+    'ParivrttaTrikonasana',
+    'Pranamasana',
+    'Santolanasana', # oneside
+    'Still',
+    'Tadasana', # oneside
+    'TriyakTadasana',
+    'Trikonasana',
+    'Tuladandasana',
+    # 'Tuladandsana':[20,15,50,15],
+    'Utkatasana',
+    'Virabhadrasana',
+    'Vrikshasana',    
+    ]
+# usage
 def usage():
     sys.exit('Usage: \nInput: <base_directory> \n outputs a entry into OUTPUT.csv <SubjID> <aasanaID> <metric_name> <Metric_value>')
 if(len(sys.argv) != 2):
@@ -25,23 +48,23 @@ list_of_subjects = next(os.walk(os.getcwd()))[1]
 
 # aasana_start_dur['someasana'] = [left start time, left duration, right start time, right duration]
 aasana_start_dur = {
-    'ArdhaChakrasana':[25,60,25,60], # non bilateral
+    'Ardhachakrasana':[25,60], # non bilateral
     'Garudasana':[25,25,65,25],
-    'Gorakshasana':[25,60,25,60], # non bilateral          
+    'Gorakshasana':[25,60], # non bilateral          
     'Katichakrasana':[25,60,100,60], 
     'Natarajasana':[25,40,80,40],
     'Natavarasana':[25,60,100,60],
-    'Naukasana':[15,20,15,20], # non bilateral
-    'Padahastasana':[30,90,30,90], # non bilateral
-    'ParivrittaTrikonasana':[30,30,80,30], 
+    'Naukasana':[15,20], # non bilateral
+    'Padahastasana':[30,90], # non bilateral
+    'ParivrttaTrikonasana':[30,30,80,30], 
     'Pranamasana':[25,30,65,30],
-    'Santolanasana':[25,35,25,35], # non bilateral
-    'Still':[20,20,20,20], # non bilateral
-    'Tadasana':[25,55,25,55], # non bilateral
-    'TiryakTadasana':[25,35,75,35],
+    'Santolanasana':[25,35], # non bilateral
+    'Still':[20,20], # non bilateral
+    'Tadasana':[25,55], # non bilateral
+    'TriyakTadasana':[25,35,75,35],
     'Trikonasana':[30,30,80,30],
-    'Tuladandsana':[20,20,20,20], # needs input
-    'Utkatasana':[20,30,20,30], # non bilateral
+    'Tuladandasana':[20,20,20,20], # needs input
+    'Utkatasana':[20,30], # non bilateral
     'Virabhadrasana':[30,25,70,25],
     'Vrikshasana':[25,30,65,30],    
 }
@@ -127,7 +150,7 @@ def extract_classification_stability(subjID,aasana_list,group_name):
 	mean_r = 0
 	mean = 0
 
-	with open('OUTPUT.csv','r') as csvFile:
+	with open(output_dir + '/OUTPUT.csv','r') as csvFile:
 		csv_reader = csv.reader(csvFile)
 		for row in csv_reader:
 			if(not row):
@@ -165,17 +188,23 @@ for subjectID in list_of_subjects:
         list_of_aasanas[i] = aasana1
     
     # generate a list of joints by accessing the files in list_of_aasanas
+    bilateral = True
     for aasanaID in list_of_aasanas:
+        if(aasanaID not in checklist): continue
         filename = directory+'/'+subjectID+'/'+subjectID+'_'+aasanaID+'/joints.csv'
         # filename = sys.argv[1]
         joints = []
-        with open(filename, 'r') as fo:
-            csv_reader = csv.reader(fo)
-            i = 0
-            for row in csv_reader:
-                if(i%2 == 0):
-                    joints.append(row) 
-                i = i+1
+        try:
+            with open(filename, 'r') as fo:
+                csv_reader = csv.reader(fo)
+                i = 0
+                for row in csv_reader:
+                    if(i%2 == 0):
+                        joints.append(row) 
+                    i = i+1
+        except:
+            print(filename+' not found')
+            continue
 
     
         weights = np.zeros((len(joint_types),3),dtype = np.float64)
@@ -191,11 +220,16 @@ for subjectID in list_of_subjects:
         time_data = aasana_start_dur[aasanaID]
         start_left = int(time_data[0])
         dur_left = int(time_data[1])
-        start_right = int(time_data[2])
-        dur_right = int(time_data[3])
-
         begin_left,end_left = getBegEnd(start_left,dur_left,jointwise)
-        begin_right,end_right = getBegEnd(start_right,dur_right,jointwise)
+        try:
+            start_right = int(time_data[2])
+            dur_right = int(time_data[3])
+            begin_right,end_right = getBegEnd(start_right,dur_right,jointwise)
+            bilateral = True
+        except:
+            bilateral = False
+        
+        
         # print(jointwise[0][begin][1])
         # print(jointwise[0][end][1])
         instability = []
@@ -243,7 +277,7 @@ for subjectID in list_of_subjects:
 
         for k in range(len(instability)):
             metric = joint_types[k] + '_Stability-l'
-            element = instability[k]
+            element = np.mean(instability[k])
             row_out = [subjectID,aasanaID,metric,element]
             with open('OUTPUT.csv','a') as csvFile:
                 csv_writer = csv.writer(csvFile)
@@ -256,6 +290,9 @@ for subjectID in list_of_subjects:
             csv_writer.writerow(row1)
         print(row1)
         os.chdir(directory)
+
+        if(not bilateral):
+            continue
 
         instability1 = []
         for i in range(25):
@@ -299,7 +336,7 @@ for subjectID in list_of_subjects:
 
         for k in range(len(instability1)):
             metric = joint_types[k] + '_Stability-r'
-            element = instability1[k]
+            element = np.mean(instability1[k])
             row_out = [subjectID,aasanaID,metric,element]
             with open('OUTPUT.csv','a') as csvFile:
                 csv_writer = csv.writer(csvFile)

@@ -4,19 +4,20 @@ import os
 import sys
 import csv
 
-if(len(sys.argv)!=4):
-    sys.exit('Usage: <base_dir> <PEBL_test_name> <subj_id>\n Output: <SubjectID> <test_name> <metric> <value> appended to OUTPUT.csv')
+if(len(sys.argv)!=3):
+    sys.exit('Usage: <base_dir> <PEBL_test_name> \n Output: <SubjectID> <test_name> <metric> <value> appended to OUTPUT.csv')
 
 base_dir = sys.argv[1]
 test_name = sys.argv[2]
-subj_id = sys.argv[3]
+subj_id = 'NULL'
+
 '''
 base_dir = 'C:/Users/a299792458tm/Anaconda3/CSProject/version2/simon'
 test_name = 'simon'
 subj_id = '53'
 '''
-csv_name = test_name + '-' + subj_id + r'.csv'
-csv_address = base_dir + '/' + test_name + '/data/'+subj_id+ '/' + csv_name
+csv_name = ''
+csv_address = ''
 
 def simon():
     # print('simon')
@@ -124,7 +125,13 @@ def dspan():
     # null dict of dspan values, and a list of metrics
     dspan_values = {}
     dspan_metrics = []
-
+    try:
+    	with open(csv_address,'r') as dopen:	
+    		pass
+    	pass
+    except:
+    	print(csv_address+' not found')
+    	return
     # fill the metrics in the list and assign values in the dict
     with open(csv_address,'r') as dopen:
         csv_reader = csv.reader(dopen)
@@ -386,5 +393,30 @@ func_dict = {'simon':simon, 'dspan':dspan, 'toh':toh, 'iowa':iowa}
 # In[139]:
 
 
-func_dict[test_name]()
+#func_dict[test_name]()
 
+
+
+
+
+def extract(tn):
+	curdirectory = os.getcwd()
+	os.chdir(base_dir + '/' + tn + '/data')
+	list_of_subjects = next(os.walk(os.getcwd()))[1]
+	global subj_id
+	global csv_name
+	global csv_address
+	global test_name
+	os.chdir(curdirectory)
+	for sub in list_of_subjects:
+		brk = sub.split('j')
+		if(brk[0]!='Sub'):
+			continue
+		subj_id = sub
+		#test_name = tn
+		csv_name = test_name + '-' + subj_id + r'.csv'
+		csv_address = base_dir + '/' + test_name + '/data/'+subj_id+ '/' + csv_name 
+		func_dict[test_name]()
+		print('~Fin '+sub)
+
+extract(test_name)
