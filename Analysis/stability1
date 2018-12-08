@@ -244,12 +244,12 @@ for subjectID in list_of_subjects:
         for k in range(len(instability)):
             metric = joint_types[k] + '_Stability-l'
             element = instability[k]
-            row_out = [subjID,aasanaID,metric,element]
+            row_out = [subjectID,aasanaID,metric,element]
             with open('OUTPUT.csv','a') as csvFile:
                 csv_writer = csv.writer(csvFile)
                 csv_writer.writerow(row_out)
 
-        row1 = [subjID,aasanaID,'Stability-l',inst]
+        row1 = [subjectID,aasanaID,'Stability-l',inst]
         
         with open('OUTPUT.csv','a') as csvFile:
             csv_writer = csv.writer(csvFile)
@@ -300,12 +300,12 @@ for subjectID in list_of_subjects:
         for k in range(len(instability1)):
             metric = joint_types[k] + '_Stability-r'
             element = instability1[k]
-            row_out = [subjID,aasanaID,metric,element]
+            row_out = [subjectID,aasanaID,metric,element]
             with open('OUTPUT.csv','a') as csvFile:
                 csv_writer = csv.writer(csvFile)
                 csv_writer.writerow(row_out)
 
-        row1 = [subjID,aasanaID,'Stability-r',inst1]
+        row1 = [subjectID,aasanaID,'Stability-r',inst1]
         
         with open('OUTPUT.csv','a') as csvFile:
             csv_writer = csv.writer(csvFile)
