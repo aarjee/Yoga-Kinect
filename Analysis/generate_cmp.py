@@ -7,9 +7,12 @@
 import csv
 import numpy as np
 import random
-
+import sys
 
 # In[5]:
+if(len(sys.argv)!=2):
+	sys.exit('Usage:\nInput: <number of random iterations N of bootstrapping>\nOutput: CMP_N.csv containing p values and correlations')
+N = int(sys.argv[1])
 
 
 def findCorrCoeff(array1,array2):
@@ -32,7 +35,8 @@ def findCorrCoeff(array1,array2):
 def bootstrap(array1,array2):
     leng = len(array1)
     freq = np.zeros(201, dtype = np.float64)
-    for j in range(100):
+    #N = int(sys.argv[1])
+    for j in range(N):
         a1 = []
         a2 = []
         for i in range(leng):
@@ -131,13 +135,14 @@ def extract_p(metric1,metric2):
 def refined_correlation_matrix():
     true_metrics = []
     metrics = []
+    file_name = 'CMP_'+str(N)+'.csv'
     with open('CORRELATION_MATRIX.csv','r') as cm:
         csv_reader = csv.reader(cm)
         for row in csv_reader:
             metrics = row
             break
         true_metrics = metrics[1:]
-    with open('CMP.csv','w') as cmp:
+    with open(file_name,'w') as cmp:
         csv_writer = csv.writer(cmp)
         csv_writer.writerow(metrics)
     #row1 = []
@@ -155,7 +160,7 @@ def refined_correlation_matrix():
                 print('error')
             print(str(i)+' '+str(j)+' '+str(len(true_metrics)))
             j = j + 1
-        with open('CMP.csv','a') as cmp:
+        with open(file_name,'a') as cmp:
             csv_writer = csv.writer(cmp)
             csv_writer.writerow(row1)
         i = i + 1
