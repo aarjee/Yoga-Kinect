@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 # coding: utf-8
 
 # In[4]:
@@ -11,7 +11,7 @@ import sys
 
 # In[5]:
 if(len(sys.argv)!=2):
-	sys.exit('Usage:\nInput: <number of random iterations N of bootstrapping>\nOutput: CMP_N.csv containing p values and correlations')
+    sys.exit('Usage:\nInput: <number of random iterations N of bootstrapping>\nOutput: CMP_N.csv containing p values and correlations')
 N = int(sys.argv[1])
 
 
