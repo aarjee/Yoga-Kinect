@@ -350,11 +350,11 @@ for subjectID in list_of_subjects:
         print(row1)
         os.chdir(directory)
 
-    extract_classification_stability(subjectID,clf.Type.unilateral,'Type_unilateral')
-    extract_classification_stability(subjectID,clf.Type.bilateral,'Type_bilateral')
-    extract_classification_stability(subjectID,clf.Type.horizontal,'Type_horizontal')
-    extract_classification_stability(subjectID,clf.Category.non_balancing,'Category_nonbalancing')
-    extract_classification_stability(subjectID,clf.Category.balancing,'Category_balancing')
+    #extract_classification_stability(subjectID,clf.Type.unilateral,'Type_unilateral')
+    #extract_classification_stability(subjectID,clf.Type.bilateral,'Type_bilateral')
+    #extract_classification_stability(subjectID,clf.Type.horizontal,'Type_horizontal')
+    #extract_classification_stability(subjectID,clf.Category.non_balancing,'Category_nonbalancing')
+    #extract_classification_stability(subjectID,clf.Category.balancing,'Category_balancing')
 
 os.chdir(output_dir)
 print('~Fin')
