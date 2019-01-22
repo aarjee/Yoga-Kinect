@@ -30,7 +30,7 @@ def simon():
     classified_dataset = {} # example key: 1_-50
     super_types = {} # example key: 1 
     # read the csv file and classify each row
-    with open(csv_address,'r+') as sim:
+    with open(csv_address,'r') as sim:
         csv_reader = csv.reader(sim)
         for row in csv_reader:
             type_of_simon = str(row[2])+'_'+str(row[3])
