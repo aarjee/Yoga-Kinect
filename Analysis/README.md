@@ -27,8 +27,9 @@ If you want to deploy the program as an executable application that can be direc
 
 ## Files added by Adhish (WIP)
 
-* stability -- To calculate stability of one subject one asan (generic script)
-* stability1 -- Iterative version that runs over all subjects and asanas (in the current structure)
+* To get final corelations, first run stability1 which will OUTPUT.csv containing stability values. To get the correlations, one must then run extract_pebl followed by obtain_correlation_matrix.py
+stability -- To calculate stability of one subject one asan (generic script)
+* stability1 -- Iterative version that runs over all subjects and asanas (in the current structure). It wil generate OUTPUT.csv containing stability values. 
 * minor_changes -- To standardize asan names in the directory structure and file names (there are spelling mistakes in general). May need to run more than once.
 * generates_cmp -- Generates correlation matix with p-values (incomplete and inefficient -- need to run for 1 week on cerebrum to generate numbers for 10K iterations. For specific matrcies it gives errors in p-values).
 * obtain_correlation_matrix.py -- Used to obtain correlation matrix from OUTPUT.csv (currently not well structured. OUTPUT.csv must be in the same folder).
