@@ -27,7 +27,12 @@ If you want to deploy the program as an executable application that can be direc
 
 ## Files added by Adhish (WIP)
 
-* To get final corelations, first run stability1 which will OUTPUT.csv containing stability values. To get the correlations, one must then run extract_pebl followed by obtain_correlation_matrix.py
+* First, ensure that the names of all the folders inside the dataset are 
+standardized, for this, use minor_changes and rename_pebl_csv
+* To get final corelations, first run stability1 which will 
+generate OUTPUT.csv containing stability values. Then run extract_pebl, 
+to append pebl metric values to OUTPUT.csv, then run obtain_correlation_matrix.py
+
 * stability -- To calculate stability of one subject one asan (generic script)
 * stability1 -- Iterative version that runs over all subjects and asanas (in the current structure). It wil generate OUTPUT.csv containing stability values. 
 * minor_changes -- To standardize asan names in the directory structure and file names (there are spelling mistakes in general). May need to run more than once.

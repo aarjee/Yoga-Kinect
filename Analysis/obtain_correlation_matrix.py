@@ -12,7 +12,7 @@ import csv
 
 def usage():
 	print('Usage\nInput arguments "0" for a detailed correlation matrix, "1" for a condensed correlation matrix ')
-    #sys.exit('gute nacht')
+	sys.exit()
     #pass
 
 if(len(sys.argv)!=2):
