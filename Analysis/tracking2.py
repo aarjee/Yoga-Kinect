@@ -81,6 +81,8 @@ def get_frames(path):
 			list = {}
 
 			for i, row in enumerate(reader):
+				if(not row):
+					continue
 				if(i==0):
 					l = row[4]
 
