@@ -18,7 +18,6 @@ for subject in list_of_subjects:
         process_video('joints.csv', 'color.avi', 'depth.avi', 'rgb', 'output.avi', 'output.csv',1, -1, 2, 0.5)
         os.chdir('..')
     os.chdir('..')
-
 """
 parser = argparse.ArgumentParser(description='Smoothen the joint movements and output them as video and a csv file')
 parser.add_argument("in_csv", help="file containing the joints")
