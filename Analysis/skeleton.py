@@ -1,24 +1,6 @@
 import argparse
 from tracking2 import process_video
-import sys
-import os
 
-def usage():
-    print('Usage\nInput: <base directory>\nOutputs output.avi and output.csv in the respective folders')
-if(len(sys.argv)!=2):
-    usage()
-directory = sys.argv[1] # directory containing all subject names
-os.chdir(directory)
-list_of_subjects = next(os.walk(os.getcwd()))[1]
-for subject in list_of_subjects:
-    os.chdir(subject)
-    list_of_aasanas = next(os.walk(os.getcwd()))[1]
-    for aasana in list_of_aasanas:
-        os.chdir(aasana)
-        process_video('joints.csv', 'color.avi', 'depth.avi', 'rgb', 'output.avi', 'output.csv',1, -1, 2, 0.5)
-        os.chdir('..')
-    os.chdir('..')
-"""
 parser = argparse.ArgumentParser(description='Smoothen the joint movements and output them as video and a csv file')
 parser.add_argument("in_csv", help="file containing the joints")
 parser.add_argument("-r", "--rgb-vid", default="color.avi", help='name of the rgb video')
@@ -34,4 +16,4 @@ parser.add_argument("-exp", "--exponential", type=float, default=0.5, help='half
 args = parser.parse_args()
 
 process_video(args.in_csv, args.rgb_vid, args.depth_vid, args.background, args.out_vid, args.out_csv,
-	args.start_frame, args.end_frame, args.median, args.exponential)"""
+	args.start_frame, args.end_frame, args.median, args.exponential)
