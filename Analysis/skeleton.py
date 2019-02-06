@@ -34,4 +34,4 @@ parser.add_argument("-exp", "--exponential", type=float, default=0.5, help='half
 args = parser.parse_args()
 
 process_video(args.in_csv, args.rgb_vid, args.depth_vid, args.background, args.out_vid, args.out_csv,
-	args.start_frame, args.end_frame, args.median, args.exponential)
+	args.start_frame, args.end_frame, args.median, args.exponential)"""
