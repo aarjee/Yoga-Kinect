@@ -3,7 +3,7 @@ from tracking2 import process_video
 
 parser = argparse.ArgumentParser(description='Smoothen the joint movements and output them as video and a csv file')
 parser.add_argument("in_csv", help="file containing the joints")
-parser.add_argument("-r", "--rgb-vid", default="colors.avi", help='name of the rgb video')
+parser.add_argument("-r", "--rgb-vid", default="color.avi", help='name of the rgb video')
 parser.add_argument("-d", "--depth-vid", default="depth.avi", help='name of the depth video')
 parser.add_argument("-b", "--background", choices=['rgb', 'depth', 'none'], default='none',help="Background on which the \
 	skeleton will be superimposed(default: none)")

@@ -20,7 +20,7 @@ for subject in list_of_subjects:
     list_of_aasanas = next(os.walk(os.getcwd()))[1]
     for aasana in list_of_aasanas:
         os.chdir(aasana)
-        process_video('joints.csv', 'colors.avi', 'depth.avi', 'rgb', 'output.avi', 'output.csv',1, -1, 2, 0.5)
+        process_video('joints.csv', 'color.avi', 'depth.avi', 'rgb', 'output.avi', 'output.csv',1, -1, 2, 0.5)
         os.chdir('..')
     os.chdir('..')
 """
