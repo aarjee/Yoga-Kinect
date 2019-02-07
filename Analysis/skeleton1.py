@@ -13,7 +13,6 @@ def usage():
     print('Usage\nInput: <base directory>\nOutputs output.avi and output.csv in the respective folders')
 if(len(sys.argv)!=2):
     usage()
-srcfile = 'E:\Yoga-Kinect\Analysis\openh264-1.8.0-win64.dll'
 directory = sys.argv[1] # directory containing all subject names
 os.chdir(directory)
 list_of_subjects = next(os.walk(os.getcwd()))[1]
@@ -22,6 +21,7 @@ for subject in list_of_subjects:
     list_of_aasanas = next(os.walk(os.getcwd()))[1]
     for aasana in list_of_aasanas:
         os.chdir(aasana)
+        srcfile = 'E:\Yoga-Kinect\Analysis\openh264-1.8.0-win64.dll'
         shutil.copy(srcfile, aasana)
         process_video('joints.csv', 'color.avi', 'depth.avi', 'rgb', 'output.avi', 'output.csv', 1, -1, 2, 0.5)
         os.chdir('..')
