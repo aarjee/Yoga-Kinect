@@ -661,7 +661,7 @@ def write_video(frames, out_vid, background_vid, start_frame, end_frame):
 				ht, wd = im.shape[:2]
 				print("ht="+ht)
 				print("wd="+wd)
-                out.write(cv2.add(im,resized_frame))
+				out.write(cv2.add(im,resized_frame))
 				counter += 1
 		cap.release()
 	else:
