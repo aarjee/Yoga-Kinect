@@ -1,4 +1,3 @@
-import skeleton1
 import os
 import cv2
 import csv
@@ -10,6 +9,7 @@ from numpy import linalg as LA
 import pickle
 import shutil
 import math
+import skeleton1
 
 INF = 10**9
 FPS = 7
