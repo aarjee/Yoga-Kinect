@@ -21,7 +21,7 @@ for subject in list_of_subjects:
     os.chdir(subject)
     list_of_aasanas = next(os.walk(os.getcwd()))[1]
     for aasana in list_of_aasanas:
-        if subject=='Subj001' and aasana='Katichakrasana':
+        if subject=='Subj001' and aasana=='Katichakrasana':
             flag=1
         os.chdir(aasana)
        # srcfile = 'E:\Yoga-Kinect\Analysis\openh264-1.8.0-win64.dll'
