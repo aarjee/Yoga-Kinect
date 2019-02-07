@@ -660,9 +660,9 @@ def write_video(frames, out_vid, background_vid, start_frame, end_frame):
 				resized_frame = cv2.resize(color_frame, (1920, 1080))
 				im=drawing.drawframe(frame)
 				if(skeleton1.flag==1):
-                    ht, wd = im.shape[:2]
-                    print("ht="+str(ht))
-                    print("wd="+str(wd))
+					ht, wd = im.shape[:2]
+					print("ht="+str(ht))
+					print("wd="+str(wd))
 				out.write(cv2.add(im,resized_frame))
 				counter += 1
 		cap.release()
