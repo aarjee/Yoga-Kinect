@@ -13,7 +13,7 @@ def usage():
     print('Usage\nInput: <base directory>\nOutputs output.avi and output.csv in the respective folders')
 if(len(sys.argv)!=2):
     usage()
-srcfile = 'openh264-1.8.0-win64.dll'
+srcfile = 'E:\Yoga-Kinect\Analysis\openh264-1.8.0-win64.dll'
 directory = sys.argv[1] # directory containing all subject names
 os.chdir(directory)
 list_of_subjects = next(os.walk(os.getcwd()))[1]
