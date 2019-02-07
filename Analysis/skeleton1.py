@@ -9,6 +9,7 @@ import argparse
 from tracking2 import process_video
 import sys
 import os
+flag=0
 def usage():
     print('Usage\nInput: <base directory>\nOutputs output.avi and output.csv in the respective folders')
 if(len(sys.argv)!=2):
@@ -20,6 +21,8 @@ for subject in list_of_subjects:
     os.chdir(subject)
     list_of_aasanas = next(os.walk(os.getcwd()))[1]
     for aasana in list_of_aasanas:
+        if subject=='Subj001' and aasana='Katichakrasana':
+            flag=1
         os.chdir(aasana)
        # srcfile = 'E:\Yoga-Kinect\Analysis\openh264-1.8.0-win64.dll'
        # shutil.copy(srcfile, aasana)
