@@ -548,7 +548,8 @@ def write_csv(frames, file_name):
 
 def write_video(frames, out_vid, background_vid, start_frame, end_frame, fps, color_inferred, color_tracked):
     capSize = (1920, 1080) # this is the size of my source video
-    codec_x264 = cv2.VideoWriter_fourcc('X', '2', '6', '4')
+    #codec_x264 = cv2.VideoWriter_fourcc('X', '2', '6', '4')
+    codec_x264 = cv2.VideoWriter_fourcc(*'MJPG')
     out = cv2.VideoWriter(out_vid,codec_x264,fps,capSize,True)
     if background_vid is not None:
         cap = cv2.VideoCapture(background_vid)
