@@ -30,7 +30,8 @@ for subject in list_of_subjects:
         aasana_path = subj_path+"\\"+aasana
         print(aasana_path)
         #cmd = "python skeleton.py -r "+aasana_path+"\\color.avi -b rgb -o "+aasana_path+"\\output.avi -oc "+aasana_path+"\\output.csv -st 1 "+"-ci "+args.color_inferred+" -ct "+args.color_tracked+" -cm "+args.color_ml+" -f 1 "+" -j1 "+aasana_path+"\\joints.csv "+"-j2 "+aasana_path+"\\joints_new.csv"
-        cmd = "python skeleton.py -n "+str(args.no_skel)+" -r "+aasana_path+"\\color.avi -nr "+aasana_path+"\\color_new.avi -b rgb -o "+aasana_path+"\\output.avi -oc "+aasana_path+"\\output.csv -st 1 "+"-ci "+args.color_inferred+" -ct "+args.color_tracked+" -j1 "+aasana_path+"\\joints.csv "
+        #cmd = "python skeleton.py -n "+str(args.no_skel)+" -r "+aasana_path+"\\color.avi -nr "+aasana_path+"\\color_new.avi -b rgb -o "+aasana_path+"\\output.avi -oc "+aasana_path+"\\output.csv -st 1 "+"-ci "+args.color_inferred+" -ct "+args.color_tracked+" -j1 "+aasana_path+"\\joints.csv "
+        cmd = "python skeleton.py -n "+str(args.no_skel)+" -r "+aasana_path+"/color.avi -nr "+aasana_path+"/color_new.avi -b rgb -o "+aasana_path+"/output.avi -oc "+aasana_path+"/output.csv -st 1 "+"-ci "+args.color_inferred+" -ct "+args.color_tracked+" -j1 "+aasana_path+"/joints.csv "
         os.system(cmd)
   
   
